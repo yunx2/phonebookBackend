@@ -32,9 +32,20 @@ const persons =[
     const content = `<div>phonebook has info for ${entries}</div><br />${time}`;
     res.send(content);
   });
+
   app.get('/api/persons', (req, res) => {
     res.json(persons);
-  })
+  });
+
+  app.get('/api/persons/:id', (req, res) => {
+    const id = parseInt(req.params.id);
+    const result = persons.find(p => p.id === id);
+    if (result) {
+    res.send(result);
+    } else {
+      res.status(404).send(`entry for id#${id} not found`);
+    }
+  });
 
 
 app.listen(port, () => console.log(`server running at ${port}`));
