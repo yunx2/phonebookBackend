@@ -58,9 +58,16 @@ let persons = [
 
   app.post('/api/persons', (req, res) => {
     const body = req.body;
+    if (persons.find(p => p.name === body.name)) {
+      return res.status(400).send(`${body.name} already exists in phonebook`);
+    }
+    if (!body.name || !body.number) {
+      return res.status(400).send(`error: content missing`);
+    }
     const newId = Math.floor(Math.random() * Math.floor(100000));
     const newEntry = {name: body.name, number: body.number, id: newId};
     persons = persons.concat(newEntry);
+    console.log(newEntry, persons);
     res.status(201).send(newEntry);
   });
 
