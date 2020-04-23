@@ -3,6 +3,8 @@ const app = express();
 
 const port = 3001;
 
+app.use(express.json());
+
 let persons = [
     { 
       "name": "Arto Hellas", 
@@ -52,6 +54,14 @@ let persons = [
     persons = persons.filter(p => p.id !== id);
     console.log(persons);
     res.status(204).end();
+  });
+
+  app.post('/api/persons', (req, res) => {
+    const body = req.body;
+    const newId = Math.floor(Math.random() * Math.floor(100000));
+    const newEntry = {name: body.name, number: body.number, id: newId};
+    persons = persons.concat(newEntry);
+    res.status(201).send(newEntry);
   });
 
 
