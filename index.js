@@ -5,9 +5,9 @@ const app = express();
 morgan.token('content', (req, res) => {
   return JSON.stringify(req.body);
 })
-
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :content'));
 
+app.use(express.static('build'));
 app.use(express.json());
 
 
