@@ -3,7 +3,7 @@ const app = express();
 
 const port = 3001;
 
-const persons =[
+let persons = [
     { 
       "name": "Arto Hellas", 
       "number": "040-123456",
@@ -45,6 +45,13 @@ const persons =[
     } else {
       res.status(404).send(`entry for id#${id} not found`);
     }
+  });
+
+  app.delete('/api/persons/:id', (req, res) => {
+    const id = parseInt(req.params.id);
+    persons = persons.filter(p => p.id !== id);
+    console.log(persons);
+    res.status(204).end();
   });
 
 
