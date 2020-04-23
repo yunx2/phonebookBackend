@@ -9,7 +9,6 @@ morgan.token('content', (req, res) => {
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :content'));
 
 app.use(cors());
-app.use(express.static('build'));
 app.use(express.json());
 
 
@@ -79,5 +78,5 @@ let persons = [
     res.status(201).send(newEntry);
   });
 
-const port = 3001;
-app.listen(port, () => console.log(`server running at ${port}`));
+const PORT = process.env.PORT || 3001;
+app.listen(PORT, () => console.log(`server running at ${PORT}`));
