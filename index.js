@@ -59,7 +59,7 @@ let persons = [
   app.post('/api/persons', (req, res) => {
     const body = req.body;
     if (persons.find(p => p.name === body.name)) {
-      return res.status(400).send(`${body.name} already exists in phonebook`);
+      return res.status(400).send(`error: name must be unique`);
     }
     if (!body.name || !body.number) {
       return res.status(400).send(`error: content missing`);
