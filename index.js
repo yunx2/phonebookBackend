@@ -1,8 +1,7 @@
 const express = require('express');
+const morgan = require('morgan');
 const app = express();
-
-const port = 3001;
-
+app.use(morgan('tiny'));
 app.use(express.json());
 
 let persons = [
@@ -71,5 +70,5 @@ let persons = [
     res.status(201).send(newEntry);
   });
 
-
+const port = 3001;
 app.listen(port, () => console.log(`server running at ${port}`));
