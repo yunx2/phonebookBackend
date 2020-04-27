@@ -37,29 +37,31 @@ app.use(express.static('build'));
   //   }
   // ];
 
-  app.get('/info', (req, res) => {
-    const entries = persons.length;
-    const time = new Date();
-    const content = `<div>phonebook has info for ${entries}</div><br />${time}`;
-    res.send(content);
-  });
+  // app.get('/info', (req, res) => {
+  //   const entries = persons.length;
+  //   const time = new Date();
+  //   const content = `<div>phonebook has info for ${entries}</div><br />${time}`;
+  //   res.send(content);
+  // });
 
   app.get('/api/persons', (req, res) => {
     Person.find({})
-      .then(data => {
-        console.log(data);
-        res.json(data);
+      .then(persons => {
+        const formatted = persons.map(p => p.toJSON());
+        res.json(formatted);
       });
   });
 
   app.get('/api/persons/:id', (req, res) => {
-    const id = parseInt(req.params.id);
-    const result = persons.find(p => p.id === id);
-    if (result) {
-    res.send(result);
-    } else {
-      res.status(404).send(`entry for id#${id} not found`);
-    }
+    const id = req.params.id;
+    Person.findById(id)
+      .then(result => {
+        const formatted = result.toJSON();
+        res.json(formatted);
+      })
+      .catch(err => {
+        res.status(404).send(`entry for id#${id} not found`);
+      })
   });
 
   app.delete('/api/persons/:id', (req, res) => {
@@ -74,10 +76,9 @@ app.use(express.static('build'));
     // if (Person.find({name: body.name})) {
     //   return res.status(400).send(`error: name must be unique`);
     // }
-    if (body.name === undefined || !body.number === undefined) {
+    if (body.name === undefined || body.number === undefined) {
       return res.status(400).send(`error: content missing`);
     }
-
     const newEntry = new Person({
       name: body.name,
       number: body.number
@@ -85,8 +86,9 @@ app.use(express.static('build'));
 
     newEntry.save()
       .then(data => {
+        const formatted = data.toJSON();
         res.status(201)
-          .json(data)
+          .json(formatted);
       })
   });
 
