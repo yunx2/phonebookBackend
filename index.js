@@ -11,8 +11,9 @@ morgan.token('content', (req, res) => {
 })
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :content'));
 app.use(cors());
-app.use(express.json());
 app.use(express.static('build'));
+app.use(express.json());
+
 
 // let persons = [
   //   { 
@@ -44,6 +45,8 @@ app.use(express.static('build'));
   //   res.send(content);
   // });
 
+  
+
   app.get('/api/persons', (req, res) => {
     Person.find({})
       .then(persons => {
@@ -52,44 +55,27 @@ app.use(express.static('build'));
       });
   });
 
-  app.get('/api/persons/:id', (req, res) => {
+  app.get('/api/persons/:id', (req, res, next) => {
     const id = req.params.id;
     Person.findById(id)
       .then(result => {
-        const formatted = result.toJSON();
-        res.json(formatted);
+        if (result) { // found a match, send data
+          const formatted = result.toJSON();
+          res.json(formatted);
+        } else {
+          res.status(404).end(); // no data matching id in db
+        }
       })
-      .catch(err => {
-        res.status(404).send(`entry for id#${id} not found`);
-      })
+      .catch(err => { // id doesn't match mongo identifier format
+        next(err);
+      });
   });
 
   app.delete('/api/persons/:id', (req, res) => {
-    const id = parseInt(req.params.id);
-    persons = persons.filter(p => p.id !== id);
-    console.log(persons);
+    const id = req.params.id;
+    Person.findByIdAndRemove(id)
+    .then(result => console.log(result))
     res.status(204).end();
-  });
-
-  app.post('/api/persons', (req, res) => {
-    const body = req.body;
-    // if (Person.find({name: body.name})) {
-    //   return res.status(400).send(`error: name must be unique`);
-    // }
-    if (body.name === undefined || body.number === undefined) {
-      return res.status(400).send(`error: content missing`);
-    }
-    const newEntry = new Person({
-      name: body.name,
-      number: body.number
-    });
-
-    newEntry.save()
-      .then(data => {
-        const formatted = data.toJSON();
-        res.status(201)
-          .json(formatted);
-      })
   });
 
 app.listen(process.env.PORT, () => console.log(`server running at ${process.env.PORT}`));
