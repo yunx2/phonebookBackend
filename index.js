@@ -1,5 +1,8 @@
 const express = require('express');
+require('dotenv').config();
+const Person = require('./models/persons')
 const morgan = require('morgan');
+const mongoose = require('mongoose');
 const cors = require('cors');
 const app = express();
 
@@ -7,34 +10,32 @@ morgan.token('content', (req, res) => {
   return JSON.stringify(req.body);
 })
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :content'));
-
 app.use(cors());
 app.use(express.json());
 app.use(express.static('build'));
 
-
-let persons = [
-    { 
-      "name": "Arto Hellas", 
-      "number": "040-123456",
-      "id": 1
-    },
-    { 
-      "name": "Ada Lovelace", 
-      "number": "39-44-5323523",
-      "id": 2
-    },
-    { 
-      "name": "Dan Abramov", 
-      "number": "12-43-234345",
-      "id": 3
-    },
-    { 
-      "name": "Mary Poppendieck", 
-      "number": "39-23-6423122",
-      "id": 4
-    }
-  ];
+// let persons = [
+  //   { 
+  //     "name": "Arto Hellas", 
+  //     "number": "040-123456",
+  //     "id": 1
+  //   },
+  //   { 
+  //     "name": "Ada Lovelace", 
+  //     "number": "39-44-5323523",
+  //     "id": 2
+  //   },
+  //   { 
+  //     "name": "Dan Abramov", 
+  //     "number": "12-43-234345",
+  //     "id": 3
+  //   },
+  //   { 
+  //     "name": "Mary Poppendieck", 
+  //     "number": "39-23-6423122",
+  //     "id": 4
+  //   }
+  // ];
 
   app.get('/info', (req, res) => {
     const entries = persons.length;
@@ -44,7 +45,11 @@ let persons = [
   });
 
   app.get('/api/persons', (req, res) => {
-    res.json(persons);
+    Person.find({})
+      .then(data => {
+        console.log(data);
+        res.json(data);
+      });
   });
 
   app.get('/api/persons/:id', (req, res) => {
@@ -66,18 +71,23 @@ let persons = [
 
   app.post('/api/persons', (req, res) => {
     const body = req.body;
-    if (persons.find(p => p.name === body.name)) {
-      return res.status(400).send(`error: name must be unique`);
-    }
-    if (!body.name || !body.number) {
+    // if (Person.find({name: body.name})) {
+    //   return res.status(400).send(`error: name must be unique`);
+    // }
+    if (body.name === undefined || !body.number === undefined) {
       return res.status(400).send(`error: content missing`);
     }
-    const newId = Math.floor(Math.random() * Math.floor(100000));
-    const newEntry = {name: body.name, number: body.number, id: newId};
-    persons = persons.concat(newEntry);
-    console.log(newEntry, persons);
-    res.status(201).send(newEntry);
+
+    const newEntry = new Person({
+      name: body.name,
+      number: body.number
+    });
+
+    newEntry.save()
+      .then(data => {
+        res.status(201)
+          .json(data)
+      })
   });
 
-const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => console.log(`server running at ${PORT}`));
+app.listen(process.env.PORT, () => console.log(`server running at ${process.env.PORT}`));

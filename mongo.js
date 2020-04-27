@@ -12,6 +12,7 @@ const personSchema = new mongoose.Schema({
   name: String,
   number: String
 });
+
 const Person = mongoose.model('Person', personSchema);
 
 if (args.length === 1) {
