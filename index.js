@@ -19,17 +19,30 @@ app.post('/api/persons', (req, res) => {
   if (body.name === undefined || body.number === undefined) {
     return res.status(400).end('missing content');
   }
-  const person = new Person({
-    name: body.name,
-    number: body.number
-  });
-  person.save()
-    .then(person => {
-      const formatted = person.toJSON();
-      res.json(formatted);
-    })
-    .catch(err => console.log(err))
-})
+  Person.find({name: body.name})
+    .then(result => {
+      if (result.length === 0) {
+        const person = new Person({
+          name: body.name,
+          number: body.number
+        });
+        person.save()
+        .then(person => {
+          const formatted = person.toJSON();
+          res.status(201).json(formatted);
+        })
+        .catch(err => console.log(err));
+      } else {
+        const entry = result[0];
+        entry['number'] = body.number;
+        Person.findByIdAndUpdate(entry.id, entry, {new:true})
+          .then(updated => {
+            const formatted = updated.toJSON();
+            res.json(formatted);
+          }); 
+      }
+    });
+});
 
 app.get('/api/persons', (req, res) => {
   Person.find({})
@@ -62,7 +75,7 @@ app.put('api/persons/:id', (req, res) => {
   Person.findByIdAndUpdate(id, update, {new: true})
     .then(updated => {
       const formatted = updated.toJSON();
-      res.send(formatted);
+      res.json(formatted);
     });
 });
 
@@ -72,5 +85,6 @@ app.delete('/api/persons/:id', (req, res) => {
   .then(result => console.log(result))
   res.status(204).end();
 });
+
 
 app.listen(process.env.PORT, () => console.log(`server running at ${process.env.PORT}`));
