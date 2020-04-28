@@ -45,37 +45,52 @@ app.use(express.json());
   //   res.send(content);
   // });
 
-  
+app.post('/api/persons', (req, res) => {
+  const body = req.body;
+  if (body.name === undefined || body.number === undefined) {
+    return res.status(400).end('missing content');
+  }
+  const person = new Person({
+    name: body.name,
+    number: body.number
+  });
+  person.save()
+    .then(person => {
+      const formatted = person.toJSON();
+      res.json(formatted);
+    })
+    .catch(err => console.log(err))
+})
 
-  app.get('/api/persons', (req, res) => {
-    Person.find({})
-      .then(persons => {
-        const formatted = persons.map(p => p.toJSON());
+app.get('/api/persons', (req, res) => {
+  Person.find({})
+    .then(persons => {
+      const formatted = persons.map(p => p.toJSON());
+      res.json(formatted);
+    });
+});
+
+app.get('/api/persons/:id', (req, res, next) => {
+  const id = req.params.id;
+  Person.findById(id)
+    .then(result => {
+      if (result) { // found a match, send data
+        const formatted = result.toJSON();
         res.json(formatted);
-      });
-  });
+      } else {
+        res.status(404).end(); // no data matching id in db
+      }
+    })
+    .catch(err => { // id doesn't match mongo identifier format
+      next(err);
+    });
+});
 
-  app.get('/api/persons/:id', (req, res, next) => {
-    const id = req.params.id;
-    Person.findById(id)
-      .then(result => {
-        if (result) { // found a match, send data
-          const formatted = result.toJSON();
-          res.json(formatted);
-        } else {
-          res.status(404).end(); // no data matching id in db
-        }
-      })
-      .catch(err => { // id doesn't match mongo identifier format
-        next(err);
-      });
-  });
-
-  app.delete('/api/persons/:id', (req, res) => {
-    const id = req.params.id;
-    Person.findByIdAndRemove(id)
-    .then(result => console.log(result))
-    res.status(204).end();
-  });
+app.delete('/api/persons/:id', (req, res) => {
+  const id = req.params.id;
+  Person.findByIdAndRemove(id)
+  .then(result => console.log(result))
+  res.status(204).end();
+});
 
 app.listen(process.env.PORT, () => console.log(`server running at ${process.env.PORT}`));
