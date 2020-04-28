@@ -3,6 +3,7 @@ require('dotenv').config();
 const Person = require('./models/persons')
 const morgan = require('morgan');
 const mongoose = require('mongoose');
+const uniqueValidator = require('mongoose-unique-validator');
 const cors = require('cors');
 const app = express();
 
@@ -14,34 +15,26 @@ app.use(cors());
 app.use(express.static('build'));
 app.use(express.json());
 
-app.post('/api/persons', (req, res) => {
-  const body = req.body;
-  if (body.name === undefined || body.number === undefined) {
-    return res.status(400).end('missing content');
+const errorHandler = (err, req, res, next) => {
+  if (err.name === 'ValidationError') {
+    console.log(err);
+    return res.status(400).send(err.message);
   }
-  Person.find({name: body.name})
-    .then(result => {
-      if (result.length === 0) {
-        const person = new Person({
-          name: body.name,
-          number: body.number
-        });
-        person.save()
-        .then(person => {
-          const formatted = person.toJSON();
-          res.status(201).json(formatted);
-        })
-        .catch(err => console.log(err));
-      } else {
-        const entry = result[0];
-        entry['number'] = body.number;
-        Person.findByIdAndUpdate(entry.id, entry, {new:true})
-          .then(updated => {
-            const formatted = updated.toJSON();
-            res.json(formatted);
-          }); 
-      }
-    });
+  next(err);
+}
+
+app.post('/api/persons', (req, res, next) => {
+  const body = req.body;
+  const person = new Person({
+    name: body.name,
+    number: body.number
+  });
+  person.save()
+  .then(person => {
+    const formatted = person.toJSON();
+    res.status(201).json(formatted);
+  })
+  .catch(err => next(err));
 });
 
 app.get('/api/persons', (req, res) => {
@@ -86,5 +79,6 @@ app.delete('/api/persons/:id', (req, res) => {
   res.status(204).end();
 });
 
+app.use(errorHandler);
 
 app.listen(process.env.PORT, () => console.log(`server running at ${process.env.PORT}`));
