@@ -17,8 +17,18 @@ mongoose.connect(process.env.MONGODB_URI, options)
 });
 
 const personSchema = new mongoose.Schema({
-  name: {type: String, required: true, unique: true, uniqueCaseInsensitive: true},
-  number: {type: String, required: true, unique: false}
+  name: {
+    type: String,
+    required: true,
+    unique: true,
+    uniqueCaseInsensitive: true,
+    minlength: 3},
+  number: {
+    type: String,
+    required: true,
+    unique: false,
+    minlength: 8
+  }
 }, {toJSON: {transform: (doc, ret) => {
   ret.id = ret._id.toString();
   delete ret._id;
