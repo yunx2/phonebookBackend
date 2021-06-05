@@ -11,7 +11,5 @@ module.exports = {
     'no-unused-vars': 0,
     'import/newline-after-import': 0,
     'import/order': 0
-    
-
   }
 }

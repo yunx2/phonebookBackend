@@ -1,10 +1,11 @@
 {
-  "name": "phoneBookBackend",
+  "name": "phonebookBackend",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
     "dev": "nodemon index.js",
+    "build:ui": "rm -rf build && cd ../phonebookFrontend && npm run build --prod && cp -r build ../phonebookBackend",
     "start": "node index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "eslint ."
