@@ -1,5 +1,5 @@
 const express = require('express');
-// require('dotenv').config();
+require('dotenv').config();
 const Person = require('./models/persons')
 const morgan = require('morgan');
 const mongoose = require('mongoose');
@@ -18,13 +18,13 @@ app.use(express.json());
 const errorHandler = (err, req, res, next) => {
   if (err.name === 'ValidationError' || err.name === 'ValidatorError') {
     console.log(err);
-    return res.status(400).json({error: err.message});
+    return res.status(400).json({ error: err.message });
   }
   next(err);
 };
 
 app.post('/api/persons', (req, res, next) => {
-  const body = req.body;
+  const { body } = req;
   const person = new Person({
     name: body.name,
     number: body.number
